@@ -9,6 +9,7 @@ arr_encrypt_letters = [' ', 'Е', 'А', 'О', 'И', 'Н', 'Т', 'Р', 'С', 'В'
 
 def frequency(enc_text: str) -> list[list[str]]:
     """
+    Returns list of different variations counts of letters in descending order
 
     :param enc_text:
     :return:
@@ -30,6 +31,7 @@ def frequency(enc_text: str) -> list[list[str]]:
 
 def decrypt_text(text_for_decrypt: str, arr_decrypt_letters: list[str]) -> str:
     """
+    Decrypt text using frequency analysis algorithm
 
     :param text_for_decrypt:
     :param arr_decrypt_letters:
@@ -46,7 +48,7 @@ def decrypt_text(text_for_decrypt: str, arr_decrypt_letters: list[str]) -> str:
 
 def write_result() -> None:
     """
-
+    Write decrypted text and keys in file
     :return:
     """
     with open('files/result.txt', 'a', encoding='utf-8') as f_result:
