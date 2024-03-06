@@ -1,11 +1,20 @@
 from collections import Counter
 
-f = open('files/encrypt_text.txt', 'r', encoding='utf-8')
-ENCRYPT_TEXT = f.readline()
 
 arr_encrypt_letters = [' ', 'Е', 'А', 'О', 'И', 'Н', 'Т', 'Р', 'С', 'В',
                        'М', 'П', 'Л', 'Д', 'Я', 'Ы', 'Х', 'Ь', 'К', 'Ч', 'Ф', 'У', 'З', 'Ж', 'Г', 'Ю',
                        'Б', 'Й', 'Ш', 'Э', 'Ц', 'Ъ', 'Щ']
+
+
+def input_text(path_input: str) -> str:
+    """
+    Read encrypted text from txt file
+    :param path_input:
+    :return:
+    """
+    with open(path_input, 'r', encoding='utf-8') as f_input:
+        return f_input.readline()
+
 
 def frequency(enc_text: str) -> list[list[str]]:
     """
@@ -18,13 +27,12 @@ def frequency(enc_text: str) -> list[list[str]]:
     dict_pairs = c.most_common()
     freq_variations = []
     for i in range(1, len(dict_pairs)):
-        if dict_pairs[i - 1][1]  == dict_pairs[i][1]:
+        if dict_pairs[i - 1][1] == dict_pairs[i][1]:
             freq_variations.append([tup[0] for tup in dict_pairs])
             tmp = dict_pairs[i - 1]
             dict_pairs[i - 1] = dict_pairs[i]
             dict_pairs[i] = tmp
             freq_variations.append([tup[0] for tup in dict_pairs])
-
 
     return freq_variations
 
@@ -46,17 +54,20 @@ def decrypt_text(text_for_decrypt: str, arr_decrypt_letters: list[str]) -> str:
     return text_for_decrypt
 
 
-def write_result() -> None:
+def write_result(path_decrypt: str, path_key: str) -> None:
     """
     Write decrypted text and keys in file
+    :param path_key:
+    :param path_decrypt:
     :return:
     """
-    with open('files/result.txt', 'a', encoding='utf-8') as f_result:
-        f_result.write(f'{decrypt_text(ENCRYPT_TEXT, frequency(ENCRYPT_TEXT)[-1])}\n')
-        keys = dict(zip(list(frequency(ENCRYPT_TEXT)[-1]), arr_encrypt_letters))
-        f_result.write(f"code: {' '.join(keys.keys())}\n")
-        f_result.write(f" key: {' '.join(keys.values())}")
+    with open(path_decrypt, 'w', encoding='utf-8') as f_decrypt:
+        f_decrypt.write(f'{decrypt_text(input_text("files/input.txt"), frequency(input_text("files/input.txt"))[-1])}\n')
+    with open(path_key, 'w', encoding='utf-8') as f_key:
+        keys = dict(zip(list(frequency(input_text("files/input.txt"))[-1]), arr_encrypt_letters))
+        f_key.write(f"code: {' '.join(keys.keys())}\n")
+        f_key.write(f" key: {' '.join(keys.values())}")
 
 
 if __name__ == "__main__":
-    write_result()
+    write_result('files/decrypt.txt', 'files/key.txt')
