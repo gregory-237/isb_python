@@ -1,9 +1,5 @@
 from collections import Counter
-
-
-arr_encrypt_letters = [' ', 'Е', 'А', 'О', 'И', 'Н', 'Т', 'Р', 'С', 'В',
-                       'М', 'П', 'Л', 'Д', 'Я', 'Ы', 'Х', 'Ь', 'К', 'Ч', 'Ф', 'У', 'З', 'Ж', 'Г', 'Ю',
-                       'Б', 'Й', 'Ш', 'Э', 'Ц', 'Ъ', 'Щ']
+from constants import arr_encrypt_letters
 
 
 def input_text(path_input: str) -> str:

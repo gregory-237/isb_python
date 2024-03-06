@@ -1,1 +1,1 @@
-KEYWORD: СТУДЕНТ
+KEYWORD: АЛГОРИТМ
