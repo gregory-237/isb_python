@@ -1,5 +1,8 @@
 from collections import Counter
 from constants import arr_encrypt_letters
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 def input_text(path_input: str) -> str:
@@ -8,8 +11,11 @@ def input_text(path_input: str) -> str:
     :param path_input:
     :return:
     """
-    with open(path_input, 'r', encoding='utf-8') as f_input:
-        return f_input.readline()
+    try:
+        with open(path_input, 'r', encoding='utf-8') as f_input:
+            return f_input.readline()
+    except Exception as ex:
+        logging.error(f"File can't be open or was not found: {ex}\n")
 
 
 def frequency(enc_text: str) -> list[list[str]]:
@@ -57,13 +63,24 @@ def write_result(path_decrypt: str, path_key: str) -> None:
     :param path_decrypt:
     :return:
     """
-    with open(path_decrypt, 'w', encoding='utf-8') as f_decrypt:
-        f_decrypt.write(f'{decrypt_text(input_text("files/input.txt"), frequency(input_text("files/input.txt"))[-1])}\n')
-    with open(path_key, 'w', encoding='utf-8') as f_key:
-        keys = dict(zip(list(frequency(input_text("files/input.txt"))[-1]), arr_encrypt_letters))
-        f_key.write(f"code: {' '.join(keys.keys())}\n")
-        f_key.write(f" key: {' '.join(keys.values())}")
+    try:
+        with open(path_decrypt, 'w', encoding='utf-8') as f_decrypt:
+            f_decrypt.write(f'{decrypt_text(input_text("files/input.txt"), frequency(input_text("files/input.txt"))[-1])}\n')
+    except Exception as ex:
+        logging.error(f"Error in decryption or file can't be open or was not found: {ex}\n")
+
+    try:
+        with open(path_key, 'w', encoding='utf-8') as f_key:
+            keys = dict(zip(list(frequency(input_text("files/input.txt"))[-1]), arr_encrypt_letters))
+            f_key.write(f"code: {' '.join(keys.keys())}\n")
+            f_key.write(f" key: {' '.join(keys.values())}")
+    except Exception as ex:
+        logging.error(f"Error in decryption or file can't be open or was not found: {ex}\n")
 
 
 if __name__ == "__main__":
-    write_result('files/decrypt.txt', 'files/key.txt')
+    try:
+        write_result('files/decrypt.txt', 'files/key.txt')
+        logging.info(f"Text successfully decrypted and saved to file")
+    except Exception as ex:
+        logging.error(f"Error in decryption or file can't be open or was not found: {ex}\n")

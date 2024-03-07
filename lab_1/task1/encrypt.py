@@ -1,7 +1,9 @@
 from sys import argv
 from constants import ALPHABET
+import logging
 
 KEYWORD = str(argv[1])
+logging.basicConfig(level=logging.INFO)
 
 
 def encryption(keyword: str, path: str) -> str:
@@ -14,8 +16,11 @@ def encryption(keyword: str, path: str) -> str:
 
     encrypted = []
 
-    with open(path, 'r', encoding='utf-8') as input_file:
-        input_text = input_file.readline()
+    try:
+        with open(path, 'r', encoding='utf-8') as input_file:
+            input_text = input_file.readline()
+    except Exception as ex:
+        logging.error(f"File can't be open or was not found: {ex}\n")
 
     key_long = keyword * (len(input_text) // len(keyword)) + keyword[:len(input_text) % len(keyword)]
 
@@ -34,11 +39,23 @@ def write_result(keyword: str, path_encrypt: str, path_key: str, path_input: str
     :param keyword:
     :return:
     """
-    with open(path_encrypt, 'w', encoding='utf-8') as encrypt_file:
-        encrypt_file.write(f'{encryption(keyword, path_input)}\n')
-    with open(path_key, 'w', encoding='utf-8') as key_file:
-        key_file.write(f'KEYWORD: {keyword}')
+    try:
+        with open(path_encrypt, 'w', encoding='utf-8') as encrypt_file:
+            encrypt_file.write(f'{encryption(keyword, path_input)}\n')
+    except Exception as ex:
+        logging.error(f"Error in encryption or file can't be open or was not found: {ex}\n")
+
+    try:
+        with open(path_key, 'w', encoding='utf-8') as key_file:
+            key_file.write(f'KEYWORD: {keyword}')
+    except Exception as ex:
+        logging.error(f"Error in encryption or file can't be open or was not found: {ex}\n")
 
 
 if __name__ == "__main__":
-    write_result(KEYWORD, 'files/encrypt.txt', 'files/key.txt', 'files/input.txt')
+    try:
+        write_result(KEYWORD, 'files/encrypt.txt', 'files/key.txt', 'files/input.txt')
+        logging.info(f"Text successfully encrypted and saved to file")
+    except Exception as ex:
+        logging.error(f"Error in encryption or file can't be open or was not found: {ex}\n")
+
