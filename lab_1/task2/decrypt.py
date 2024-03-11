@@ -1,6 +1,10 @@
-from collections import Counter
-from constants import arr_encrypt_letters
 import logging
+import os
+
+from collections import Counter
+
+from constants import arr_encrypt_letters, PATHS
+from lab_1.task1.json_read import json_reader
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,7 +17,7 @@ def input_text(path_input: str) -> str:
     """
     try:
         with open(path_input, 'r', encoding='utf-8') as f_input:
-            return f_input.readline()
+            return f_input.read()
     except Exception as ex:
         logging.error(f"File can't be open or was not found: {ex}\n")
 
@@ -56,22 +60,20 @@ def decrypt_text(text_for_decrypt: str, arr_decrypt_letters: list[str]) -> str:
     return text_for_decrypt
 
 
-def write_result(path_decrypt: str, path_key: str) -> None:
+def write_result(path_decrypt: str, path_key: str, path_input: str) -> None:
     """
     Write decrypted text and keys in file
+    :param path_input:
     :param path_key:
     :param path_decrypt:
     :return:
     """
     try:
         with open(path_decrypt, 'w', encoding='utf-8') as f_decrypt:
-            f_decrypt.write(f'{decrypt_text(input_text("files/input.txt"), frequency(input_text("files/input.txt"))[-1])}\n')
-    except Exception as ex:
-        logging.error(f"Error in decryption or file can't be open or was not found: {ex}\n")
+            f_decrypt.write(f'{decrypt_text(input_text(path_input), frequency(input_text(path_input))[-1])}\n')
 
-    try:
         with open(path_key, 'w', encoding='utf-8') as f_key:
-            keys = dict(zip(list(frequency(input_text("files/input.txt"))[-1]), arr_encrypt_letters))
+            keys = dict(zip(list(frequency(input_text(path_input))[-1]), arr_encrypt_letters))
             f_key.write(f"code: {' '.join(keys.keys())}\n")
             f_key.write(f" key: {' '.join(keys.values())}")
     except Exception as ex:
@@ -79,8 +81,10 @@ def write_result(path_decrypt: str, path_key: str) -> None:
 
 
 if __name__ == "__main__":
+    paths = json_reader(PATHS)
     try:
-        write_result('files/decrypt.txt', 'files/key.txt')
+        write_result(os.path.join(paths["folder"], paths["decrypt"]),
+                     os.path.join(paths["folder"], paths["key"]), os.path.join(paths["folder"], paths["input"]))
         logging.info(f"Text successfully decrypted and saved to file")
     except Exception as ex:
         logging.error(f"Error in decryption or file can't be open or was not found: {ex}\n")

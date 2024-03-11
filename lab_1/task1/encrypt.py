@@ -1,6 +1,10 @@
-from sys import argv
-from constants import ALPHABET
 import logging
+import os
+
+from sys import argv
+
+from constants import ALPHABET, PATHS
+from json_read import json_reader
 
 KEYWORD = str(argv[1])
 logging.basicConfig(level=logging.INFO)
@@ -14,20 +18,20 @@ def encryption(keyword: str, path: str) -> str:
     :return:
     """
 
-    encrypted = []
+    encrypted = ""
 
     try:
         with open(path, 'r', encoding='utf-8') as input_file:
             input_text = input_file.readline()
+
+        key_long = keyword * (len(input_text) // len(keyword)) + keyword[:len(input_text) % len(keyword)]
+
+        for letter, key in zip(input_text, key_long):
+            encrypted += ''.join((symbol for symbol, code in ALPHABET.items()
+                                  if code == (ALPHABET[letter] + ALPHABET[key]) % 33))
+        return encrypted
     except Exception as ex:
-        logging.error(f"File can't be open or was not found: {ex}\n")
-
-    key_long = keyword * (len(input_text) // len(keyword)) + keyword[:len(input_text) % len(keyword)]
-
-    for letter, key in zip(input_text, key_long):
-        encrypted.append(''.join((symbol for symbol, code in ALPHABET.items() if code == (ALPHABET[letter] + ALPHABET[key]) % 33)))
-
-    return ''.join(encrypted)
+        logging.error(f"Error in encryption or file can't be open or was not found: {ex}\n")
 
 
 def write_result(keyword: str, path_encrypt: str, path_key: str, path_input: str) -> None:
@@ -42,10 +46,7 @@ def write_result(keyword: str, path_encrypt: str, path_key: str, path_input: str
     try:
         with open(path_encrypt, 'w', encoding='utf-8') as encrypt_file:
             encrypt_file.write(f'{encryption(keyword, path_input)}\n')
-    except Exception as ex:
-        logging.error(f"Error in encryption or file can't be open or was not found: {ex}\n")
 
-    try:
         with open(path_key, 'w', encoding='utf-8') as key_file:
             key_file.write(f'KEYWORD: {keyword}')
     except Exception as ex:
@@ -53,8 +54,10 @@ def write_result(keyword: str, path_encrypt: str, path_key: str, path_input: str
 
 
 if __name__ == "__main__":
+    paths = json_reader(PATHS)
     try:
-        write_result(KEYWORD, 'files/encrypt.txt', 'files/key.txt', 'files/input.txt')
+        write_result(KEYWORD, os.path.join(paths["folder"], paths["encrypt"]),
+                     os.path.join(paths["folder"], paths["key"]), os.path.join(paths["folder"], paths["input"]))
         logging.info(f"Text successfully encrypted and saved to file")
     except Exception as ex:
         logging.error(f"Error in encryption or file can't be open or was not found: {ex}\n")
