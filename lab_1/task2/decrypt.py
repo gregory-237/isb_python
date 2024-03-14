@@ -2,7 +2,6 @@ import logging
 import os
 
 from collections import Counter
-
 from constants import arr_encrypt_letters, PATHS
 from lab_1.task1.json_read import json_reader
 

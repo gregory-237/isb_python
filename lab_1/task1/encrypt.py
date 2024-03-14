@@ -2,7 +2,6 @@ import logging
 import os
 
 from sys import argv
-
 from constants import ALPHABET, PATHS
 from json_read import json_reader
 
