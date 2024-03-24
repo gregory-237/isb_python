@@ -24,7 +24,6 @@ void generate_binary_sequence(int n) {
 int main() {
     int bits;
     std::cout << "Enter number of bits for sequence: "; // for example i will use 128-bit seq
-
     std::cin >> bits;
 
     generate_binary_sequence(bits);
