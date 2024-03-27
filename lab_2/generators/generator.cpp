@@ -4,6 +4,8 @@
 /**
  * This function initializes the random number generator using the current time and generates
  * a n-bit binary sequence, printing it to the standard output.
+ * @param n number of bits in sequence
+ * @return None
  */
 void generate_binary_sequence(int n) {
 
