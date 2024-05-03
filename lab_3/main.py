@@ -1,4 +1,6 @@
 import argparse
+import logging
+
 from utility import read_json_file
 
 from two_type_operations import TwoTypeOperations
@@ -28,23 +30,28 @@ def main():
                         type=str,
                         default='paths.json',
                         help='Path to the setting file of the project')
+    try:
+        args = parser.parse_args()
+        if args.key_length < 32 or args.key_length > 448 or args.key_length % 8 != 0:
+            raise argparse.ArgumentTypeError
+        symmetric_crypto = Symmetric(args.key_length)
+        settings = read_json_file(args.settings)
+        asymmetric_crypto = Asymmetric(settings['private_key'], settings['public_key'])
+        two_type_operate = TwoTypeOperations(settings['text_file'],
+                                             settings['symmetric_key_file'], settings['encrypted_text_file'],
+                                             settings['decrypted_text_file'], symmetric_crypto, asymmetric_crypto)
 
-    args = parser.parse_args()
-    symmetric_crypto = Symmetric(args.key_length)
-    settings = read_json_file(args.settings)
-    asymmetric_crypto = Asymmetric(settings['private_key'], settings['public_key'])
-    two_type_operate = TwoTypeOperations(settings['text_file'],
-                                         settings['symmetric_key_file'], settings['encrypted_text_file'],
-                                         settings['decrypted_text_file'], symmetric_crypto, asymmetric_crypto)
+        if args.keys:
+            two_type_operate.generate_keys()
 
-    if args.keys:
-        two_type_operate.generate_keys()
+        elif args.encryption:
+            two_type_operate.encrypt_text()
 
-    elif args.encryption:
-        two_type_operate.encrypt_text()
+        elif args.decryption:
+            two_type_operate.decrypt_text()
 
-    elif args.decryption:
-        two_type_operate.decrypt_text()
+    except argparse.ArgumentTypeError:
+        logging.error(f"Error in arguments, key_length must be in 32 to 448 bits")
 
 
 if __name__ == "__main__":

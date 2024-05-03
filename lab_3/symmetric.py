@@ -55,7 +55,7 @@ class Symmetric:
             padded_text = padder.update(text) + padder.finalize()
             return iv + encryptor.update(padded_text) + encryptor.finalize()
         except CryptographyDeprecationWarning:
-            logging.error("In this version Blowfish marked as old type")
+            logging.warning("In this version Blowfish marked as old type")
 
         except Exception as e:
             logging.error(f"Error in encryption - {e}")
@@ -79,7 +79,7 @@ class Symmetric:
             unpadder = padding.PKCS7(128).unpadder()
             return unpadder.update(decrypted_text) + unpadder.finalize()
         except CryptographyDeprecationWarning:
-            logging.error("In this version Blowfish marked as old type")
+            logging.warning("In this version Blowfish marked as old type")
 
         except Exception as e:
             logging.error(f"Error in decryption - {e}")
