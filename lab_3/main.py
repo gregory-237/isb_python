@@ -1,15 +1,17 @@
 import argparse
 import logging
 
-from utility import read_json_file
-
 from two_type_operations import TwoTypeOperations
 from symmetric import Symmetric
 from asymmetric import Asymmetric
+from utility import UtilityWorkFile
+from constants import PATHS_DEFAULT
 
 
 def main():
     parser = argparse.ArgumentParser(description="Entry point of the program")
+    paths_default = UtilityWorkFile(PATHS_DEFAULT)
+    paths_dict = paths_default.read_json_file()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-key', '--keys',
                        action='store_true',
@@ -26,29 +28,54 @@ def main():
                         default=448,
                         help='Length of the symmetric key in bits (default: 448).')
 
-    parser.add_argument('-s', '--settings',
+    parser.add_argument('-text', '--input_text_file',
                         type=str,
-                        default='paths.json',
-                        help='Path to the setting file of the project')
+                        default=paths_dict["text_file"],
+                        help='Path of the input txt file with text(default: paths_dict["text_file"]')
+
+    parser.add_argument('-public_key', '--public_key_path',
+                        type=str,
+                        default=paths_dict["public_key"],
+                        help='Path of the public pem file with key(default: paths_dict["public_key"]')
+
+    parser.add_argument('-private_key', '--private_key_path',
+                        type=str,
+                        default=paths_dict["private_key"],
+                        help='Path of the private pem file with key(default: paths_dict["private_key"]')
+
+    parser.add_argument('-sym_key', '--symmetric_key_path',
+                        type=str,
+                        default=paths_dict["symmetric_key_file"],
+                        help='Path of the symmetric txt file with key(default: paths_dict["symmetric_key_file"]')
+
+    parser.add_argument('-enc_path', '--encrypted_text_path',
+                        type=str,
+                        default=paths_dict["encrypted_text_file"],
+                        help='Path of the txt file with encrypted text(default: paths_dict["encrypted_text_file"]')
+
+    parser.add_argument('-dec_path', '--decrypted_text_path',
+                        type=str,
+                        default=paths_dict["decrypted_text_file"],
+                        help='Path of the txt file with decrypted text(default: paths_dict["decrypted_text_file"]')
+
     try:
         args = parser.parse_args()
         if args.key_length < 32 or args.key_length > 448 or args.key_length % 8 != 0:
             raise argparse.ArgumentTypeError
         symmetric_crypto = Symmetric(args.key_length)
-        settings = read_json_file(args.settings)
-        asymmetric_crypto = Asymmetric(settings['private_key'], settings['public_key'])
-        two_type_operate = TwoTypeOperations(settings['text_file'],
-                                             settings['symmetric_key_file'], settings['encrypted_text_file'],
-                                             settings['decrypted_text_file'], symmetric_crypto, asymmetric_crypto)
+        asymmetric_crypto = Asymmetric(args.private_key_path, args.public_key_path)
+        two_type_operate = TwoTypeOperations(args.input_text_file,
+                                             args.symmetric_key_path, args.encrypted_text_path,
+                                             args.decrypted_text_path, symmetric_crypto, asymmetric_crypto)
+        match args:
+            case args if args.keys:
+                two_type_operate.generate_keys()
 
-        if args.keys:
-            two_type_operate.generate_keys()
+            case args if args.encryption:
+                two_type_operate.encrypt_text()
 
-        elif args.encryption:
-            two_type_operate.encrypt_text()
-
-        elif args.decryption:
-            two_type_operate.decrypt_text()
+            case args if args.decryption:
+                two_type_operate.decrypt_text()
 
     except argparse.ArgumentTypeError:
         logging.error(f"Error in arguments, key_length must be in 32 to 448 bits")

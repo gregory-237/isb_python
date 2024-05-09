@@ -2,7 +2,7 @@ import logging
 
 from symmetric import Symmetric
 from asymmetric import Asymmetric
-from utility import serialize_key, deserialize_key, read_text_file, read_json_file, write_text_file
+from utility import UtilityWorkFile
 
 logging.basicConfig(level=logging.INFO)
 
@@ -44,8 +44,8 @@ class TwoTypeOperations:
             self.asymmetric_crypto.serialize_public_key(public_key)
 
             encrypted_symmetric_key = self.asymmetric_crypto.encrypt_with_public_key(public_key, symmetric_key)
-            serialize_key(encrypted_symmetric_key,
-                                        f"{self.symmetric_key_path[:-4]}_{self.symmetric_crypto.key_len}.txt")
+            key = UtilityWorkFile(f"{self.symmetric_key_path[:-4]}_{self.symmetric_crypto.key_len}.txt")
+            key.serialize_key(encrypted_symmetric_key)
 
             logging.info("Keys successfully generated and written to files.")
         except Exception as ex:
@@ -56,13 +56,15 @@ class TwoTypeOperations:
         Encrypt the text using the generated symmetric key and write it to a file.
         """
         try:
-            symmetric_key = deserialize_key(
-                f"{self.symmetric_key_path[:-4]}_{self.symmetric_crypto.key_len}.txt")
+            key = UtilityWorkFile(f"{self.symmetric_key_path[:-4]}_{self.symmetric_crypto.key_len}.txt")
+            symmetric_key = key.deserialize_key()
             symmetric_key = self.asymmetric_crypto.decrypt_with_private_key(
                 self.asymmetric_crypto.deserialize_private_key(), symmetric_key)
-            plaintext = bytes(read_text_file(self.text_path, "r", "UTF-8"), "UTF-8")
+            text_file = UtilityWorkFile(self.text_path)
+            plaintext = bytes(text_file.read_text_file("r", "UTF-8"), "UTF-8")
             encrypted_text = self.symmetric_crypto.encrypt_text(symmetric_key, plaintext)
-            write_text_file(encrypted_text, self.encrypted_text_path)
+            enc_file = UtilityWorkFile(self.encrypted_text_path)
+            enc_file.write_text_file(encrypted_text)
             logging.info("Text successfully encrypted and written to file.")
         except Exception as ex:
             logging.error(f"An error occurred while encrypting the text: {ex}")
@@ -72,13 +74,15 @@ class TwoTypeOperations:
         Decrypt the text using the generated symmetric key and write it to a file.
         """
         try:
-            symmetric_key = deserialize_key(
-                f"{self.symmetric_key_path[:-4]}_{self.symmetric_crypto.key_len}.txt")
+            sym_key = UtilityWorkFile(f"{self.symmetric_key_path[:-4]}_{self.symmetric_crypto.key_len}.txt")
+            symmetric_key = sym_key.deserialize_key()
             symmetric_key = self.asymmetric_crypto.decrypt_with_private_key(
                 self.asymmetric_crypto.deserialize_private_key(), symmetric_key)
-            encrypted_text = bytes(read_text_file(self.encrypted_text_path, "rb"))
+            enc_file = UtilityWorkFile(self.encrypted_text_path)
+            encrypted_text = bytes(enc_file.read_text_file("rb"))
             decrypted_text = self.symmetric_crypto.decrypt_text(symmetric_key, encrypted_text)
-            write_text_file(decrypted_text, self.decrypted_text_path)
+            dec_file = UtilityWorkFile(self.decrypted_text_path)
+            dec_file.write_text_file(decrypted_text)
             logging.info("Text successfully decrypted and written to file.")
         except Exception as ex:
             logging.error(f"An error occurred while decrypting the text: {ex}")
